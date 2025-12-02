@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id          String   @id @default(cuid())
+  firebaseUid String   @unique
+  email       String?  @unique
+  phone       String?  @unique
+  name        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 1 user -> many appointments
+  appointments Appointment[]
+}
+
+model Appointment {
+  id          String   @id @default(cuid())
+  userId      String
+  serviceType String
+  date        DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // many appointments -> 1 user
+  user User @relation(fields: [userId], references: [id])
+}
+
+model TicketProvider {
+  id        String     @id @default(cuid())
+  name      String
+  type      TicketType
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  buses   BusTrip[]
+  movies  MovieShow[]
+  flights FlightTrip[]
+}
+
+enum TicketType {
+  BUS
+  MOVIE
+  FLIGHT
+}
+
+model BusTrip {
+  id         String   @id @default(cuid())
+  providerId String
+  from       String
+  to         String
+  date       DateTime
+  price      Float
+  seatsLeft  Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  provider TicketProvider @relation(fields: [providerId], references: [id])
+}
+
+model MovieShow {
+  id         String   @id @default(cuid())
+  providerId String
+  movieName  String
+  hall       String
+  time       DateTime
+  price      Float
+  seatsLeft  Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  provider TicketProvider @relation(fields: [providerId], references: [id])
+}
+
+model FlightTrip {
+  id         String   @id @default(cuid())
+  providerId String
+  from       String
+  to         String
+  date       DateTime
+  price      Float
+  seatsLeft  Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  provider TicketProvider @relation(fields: [providerId], references: [id])
+}
