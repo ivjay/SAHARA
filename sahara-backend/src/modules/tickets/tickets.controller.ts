@@ -1,4 +1,5 @@
-import { Controller, Get, Query } from '@nestjs/common';
+// src/modules/tickets/tickets.controller.ts
+import { Body, Controller, Post } from '@nestjs/common';
 import { TicketsService } from './tickets.service';
 import { SearchBusDto } from './dto/search-bus.dto';
 import { SearchMovieDto } from './dto/search-movie.dto';
@@ -8,21 +9,18 @@ import { SearchFlightDto } from './dto/search-flights.dto';
 export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
 
-  @Get('bus')
-  async searchBus(@Query() query: SearchBusDto) {
-    // Example: /tickets/bus?from=Kathmandu&to=Pokhara&date=2025-12-03&passengers=1
-    return this.ticketsService.searchBus(query);
+  @Post('bus/search')
+  async searchBus(@Body() dto: SearchBusDto) {
+    return this.ticketsService.searchBus(dto);
   }
 
-  @Get('movie')
-  async searchMovie(@Query() query: SearchMovieDto) {
-    // Example: /tickets/movie?city=Kathmandu&date=2025-12-03&movieName=Dune
-    return this.ticketsService.searchMovie(query);
+  @Post('movie/search')
+  async searchMovie(@Body() dto: SearchMovieDto) {
+    return this.ticketsService.searchMovie(dto);
   }
 
-  @Get('flight')
-  async searchFlight(@Query() query: SearchFlightDto) {
-    // Example: /tickets/flight?from=KTM&to=PKR&date=2025-12-03&passengers=2
-    return this.ticketsService.searchFlight(query);
+  @Post('flight/search')
+  async searchFlight(@Body() dto: SearchFlightDto) {
+    return this.ticketsService.searchFlight(dto);
   }
 }

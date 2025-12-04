@@ -1,36 +1,45 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../infra/prisma.service';
-
-
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
-    return this.prisma.user.findMany();
+  async findOrCreateByFirebaseUid(dto: CreateUserDto) {
+    return this.prisma.user.upsert({
+      where: { firebaseUid: dto.firebaseUid },
+      update: {
+        email: dto.email ?? undefined,
+        phone: dto.phone ?? undefined,
+        name: dto.name ?? undefined,
+      },
+      create: {
+        firebaseUid: dto.firebaseUid,
+        email: dto.email,
+        phone: dto.phone,
+        name: dto.name,
+      },
+    });
   }
 
-  findById(id: string) {
+  async findById(id: string) {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
-  findByFirebaseUid(firebaseUid: string) {
+  async findByFirebaseUid(firebaseUid: string) {
     return this.prisma.user.findUnique({ where: { firebaseUid } });
   }
 
-  async createOrUpdateFromFirebase(data: {
-    firebaseUid: string;
-    email?: string | null;
-    phone?: string | null;
-    name?: string | null;
-  }) {
-    const { firebaseUid, email, phone, name } = data;
-
-    return this.prisma.user.upsert({
-      where: { firebaseUid },
-      update: { email, phone, name },
-      create: { firebaseUid, email, phone, name },
+  async update(id: string, dto: UpdateUserDto) {
+    return this.prisma.user.update({
+      where: { id },
+      data: {
+        email: dto.email ?? undefined,
+        phone: dto.phone ?? undefined,
+        name: dto.name ?? undefined,
+      },
     });
   }
 }

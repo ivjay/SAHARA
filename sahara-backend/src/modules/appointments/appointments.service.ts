@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../infra/prisma.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 
@@ -6,7 +6,13 @@ import { CreateAppointmentDto } from './dto/create-appointment.dto';
 export class AppointmentsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(dto: CreateAppointmentDto) {
+  async create(dto: CreateAppointmentDto) {
+    // ensure user exists
+    const user = await this.prisma.user.findUnique({ where: { id: dto.userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
     return this.prisma.appointment.create({
       data: {
         userId: dto.userId,
@@ -16,7 +22,7 @@ export class AppointmentsService {
     });
   }
 
-  findByUserId(userId: string) {
+  async listByUser(userId: string) {
     return this.prisma.appointment.findMany({
       where: { userId },
       orderBy: { date: 'asc' },

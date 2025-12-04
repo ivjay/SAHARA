@@ -1,6 +1,6 @@
-// src/chatbot/sahara-types.ts  (or src/modules/chatbot/sahara-types.ts)
+// src/chatbot/sahara-types.ts
 
-// High-level intent categories Sahara cares about
+// High-level intent, must match what you put in the prompt
 export type SaharaIntent =
   | 'BOOK_APPOINTMENT'
   | 'BOOK_TICKET'
@@ -10,76 +10,75 @@ export type SaharaIntent =
   | 'CONVERSATION'
   | 'UNKNOWN';
 
-// ----------------------------------------
-// Ticket payload used when type === 'BOOK_TICKET'
-// ----------------------------------------
+// Allowed backend action "type" strings
+export type SaharaActionType =
+  | 'BOOK_TICKET'
+  | 'BOOK_APPOINTMENT'
+  | 'INFO_LOOKUP';
 
-export type TicketKind = 'BUS' | 'MOVIE' | 'FLIGHT';
+// ----------------------
+// Payload shapes
+// ----------------------
 
-export interface TicketPayload {
-  kind: TicketKind;
+// For bus/movie/flight ticket search
+export interface BookTicketPayload {
+  kind: 'BUS' | 'MOVIE' | 'FLIGHT';
 
   // Common
-  date?: string;       // "YYYY-MM-DD" or ISO
+  date?: string; // "YYYY-MM-DD" or ISO
   passengers?: number;
 
   // BUS / FLIGHT
   from?: string;
   to?: string;
-  busType?: string;    // for BUS only
 
-  // MOVIE
+  // BUS-only
+  busType?: string;
+
+  // MOVIE-only
   city?: string;
   movieName?: string;
   seats?: number;
   seatType?: string;
 
-  // FLIGHT-specific
+  // FLIGHT-only
   cabinClass?: string;
   preferredAirline?: string;
 
-  // Later: which provider we picked (BusSewa, specific cinema, airline, etc.)
+  // Optional internal/provider/raw stuff
   providerId?: string;
-
-  // Raw/original user message (optional, useful for debugging)
   raw?: string;
 }
 
-// ----------------------------------------
-// Appointment payload when type === 'BOOK_APPOINTMENT'
-// ----------------------------------------
-
-export interface AppointmentPayload {
-  serviceType: string; // e.g. "doctor", "dentist", "salon"
-  date?: string;       // ISO string
-  locationId?: string; // clinic / hospital / business ID (future)
-  location?: string;   // free-form address / area
+// Appointment booking payload
+export interface BookAppointmentPayload {
+  serviceType: string;        // REQUIRED in your prompt
+  date?: string;              // ISO date string (optional)
+  locationId?: string;
+  location?: string;
   notes?: string;
   raw?: string;
 }
 
-// ----------------------------------------
-// Info lookup payload when type === 'INFO_LOOKUP'
-// ----------------------------------------
-
+// Info lookup payload
 export interface InfoLookupPayload {
-  topic: string; // "passport renewal", "citizenship", etc.
-  category?: 'GOV' | 'TRAVEL' | 'GENERAL' | 'TRANSPORT';
+  topic: string;
+  category: 'GOV' | 'TRAVEL' | 'GENERAL' | 'TRANSPORT';
   raw?: string;
 }
 
-// ----------------------------------------
-// ACTION TYPES (DISCRIMINATED UNION)
-// ----------------------------------------
+// ----------------------
+// Action objects
+// ----------------------
 
 export interface BookTicketAction {
   type: 'BOOK_TICKET';
-  payload: TicketPayload;
+  payload: BookTicketPayload;
 }
 
 export interface BookAppointmentAction {
   type: 'BOOK_APPOINTMENT';
-  payload: AppointmentPayload;
+  payload: BookAppointmentPayload;
 }
 
 export interface InfoLookupAction {
@@ -87,8 +86,7 @@ export interface InfoLookupAction {
   payload: InfoLookupPayload;
 }
 
-// If in future you want actions for SMALL_TALK, FEEDBACK, etc., add them here.
-
+// Union of all actions
 export type SaharaAction =
   | BookTicketAction
   | BookAppointmentAction

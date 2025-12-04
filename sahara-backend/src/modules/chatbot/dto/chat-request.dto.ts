@@ -24,6 +24,7 @@ export class ChatRequestDto {
   @IsOptional()
   @IsString()
   sessionId?: string;
+  langauge?: 'en' | 'np';
 
   // optional conversation history
   @IsOptional()
